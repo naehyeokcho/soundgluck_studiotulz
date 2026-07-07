@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SOUNDGLÜCK Studio Tulz — Wireframe v11.0</title>
+<title>SOUNDGLÜCK Studio Tulz — Wireframe v11.1</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -478,6 +478,7 @@
           </div>
           <div class="keyrange-editor" id="keyRangeEditor" style="display:none;">
             <span class="score-toolbar-label" id="keyRangeTitle">Key Range</span>
+            <span style="color:var(--danger);font-family:var(--mono);font-size:10px;margin-left:8px;">⚠ 시각화 전용 — 실기 미반영 (원격 전송 방법 확인 전)</span>
             <div class="keyrange-zone-rows" id="keyRangeRows"></div>
             <svg class="keyrange-piano" id="keyRangePiano" viewBox="0 0 700 36" preserveAspectRatio="none"></svg>
             <div class="keyrange-legend">
@@ -487,6 +488,7 @@
           </div>
           <div class="keyrange-editor" id="velocityEditor" style="display:none;">
             <span class="score-toolbar-label" id="velocityTitle">Velocity Range</span>
+            <span style="color:var(--danger);font-family:var(--mono);font-size:10px;margin-left:8px;">⚠ 시각화 전용 — 실기 미반영 (원격 전송 방법 확인 전)</span>
             <div class="keyrange-zone-rows" id="velocityRows"></div>
             <div class="velocity-ruler" id="velocityRuler">
               <span>0</span><span>32</span><span>64</span><span>96</span><span>127</span>
@@ -1249,9 +1251,21 @@ function renderZones(){
       else if(action === 'vel-open'){ openVelocityEditor(idx); return; }
       else if(action === 'mute') s.mute = !s.mute;
       else if(action === 'solo') s.solo = !s.solo;
+      if(action === 'mute' || action === 'solo') syncZoneMuteState();
       renderZones();
       saveAppState();
     });
+  });
+}
+
+/* MUTE/SOLO 실기 반영 (v11.1) — 별도 CC 없이, 검증된 CC7(Volume)을 재활용:
+   뮤트 상태면 CC7=0 전송, 해제되면 저장된 실제 볼륨값으로 복원 전송 */
+function syncZoneMuteState(){
+  const settings = ZONE_SETTINGS[currentModel];
+  const anySolo = settings.some(s=>s.solo);
+  settings.forEach((s, idx)=>{
+    const effectiveMute = s.mute || (anySolo && !s.solo);
+    sendMidiCC(idx, 7, effectiveMute ? 0 : s.volume);
   });
 }
 
@@ -2375,7 +2389,7 @@ window.addEventListener('pointerdown', (e)=>{
 
 renderStaff();
 
-document.querySelectorAll('.page-nav-btn').forEach(btn=>{
+document.querySelectorAll('.page-nav-btn[data-page]').forEach(btn=>{
   btn.addEventListener('click', ()=> switchPage(btn.dataset.page));
 });
 
