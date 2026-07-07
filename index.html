@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SOUNDGLÜCK Studio Tulz — Wireframe v11.3</title>
+<title>SOUNDGLÜCK Studio Tulz — Wireframe v11.4</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -430,7 +430,8 @@
 
   /* ---- 하단 저작권 안내 (v11.3) ---- */
   .app-footer{margin-top:36px;padding:18px 10px 6px;text-align:center;border-top:1px solid var(--border);
-    font-family:var(--mono);font-size:10.5px;line-height:1.7;color:var(--text-lo);}
+    font-family:var(--mono);font-size:11px;line-height:1.8;color:var(--text-mid);}
+  .app-footer strong{color:var(--ivory);font-weight:700;}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
@@ -576,20 +577,20 @@
     </div>
 
     <div class="preset-header" style="margin-bottom:14px;flex-wrap:wrap;gap:10px;">
-      <div class="page-nav-btn" id="btnEditUndo" data-tt="이전 상태로 되돌리기" title="Undo">↶ Undo</div>
-      <div class="page-nav-btn" id="btnEditRedo" data-tt="되돌리기 취소" title="Redo">↷ Redo</div>
+      <div class="page-nav-btn tt tt-below" id="btnEditUndo" data-tt="바로 전 노브·슬라이더 조작 1단계를 취소합니다. 최대 50단계까지 되돌릴 수 있어요" title="Undo">↶ Undo</div>
+      <div class="page-nav-btn tt tt-below" id="btnEditRedo" data-tt="Undo로 되돌린 것을 다시 앞으로 되돌립니다" title="Redo">↷ Redo</div>
       <div style="width:1px;height:20px;background:var(--border-hi);"></div>
-      <div class="page-nav-btn" id="btnStoreA" title="현재 상태를 A에 저장">Store A</div>
-      <div class="page-nav-btn" id="btnStoreB" title="현재 상태를 B에 저장">Store B</div>
-      <div class="page-nav-btn" id="btnCompareAB" title="A/B 전환 비교">A/B 비교</div>
+      <div class="page-nav-btn tt tt-below" id="btnStoreA" data-tt="지금 이 순간의 모든 노브/슬라이더 값을 A 슬롯에 저장합니다. 원본 소리를 잠깐 남겨두고 실험할 때 유용해요" title="현재 상태를 A에 저장">Store A</div>
+      <div class="page-nav-btn tt tt-below" id="btnStoreB" data-tt="값을 이리저리 바꾼 뒤 결과를 B 슬롯에 저장합니다. A와 B를 만들어두면 바로 비교할 수 있어요" title="현재 상태를 B에 저장">Store B</div>
+      <div class="page-nav-btn tt tt-below" id="btnCompareAB" data-tt="A ↔ B 상태를 번갈아 적용해서 소리 차이를 직접 비교합니다 (먼저 Store A, Store B를 눌러 두어야 함)" title="A/B 전환 비교">A/B 비교</div>
       <div style="width:1px;height:20px;background:var(--border-hi);"></div>
       <span style="font-family:var(--mono);font-size:10px;color:var(--text-lo);">MUTATE</span>
       <div class="chip-row" id="mutateIntensity">
-        <div class="chip" data-intensity="0.3">Subtle</div>
-        <div class="chip active" data-intensity="1">Normal</div>
-        <div class="chip" data-intensity="1.8">Extreme</div>
+        <div class="chip tt tt-below" data-intensity="0.3" data-tt="원래 음색 느낌은 유지하면서 살짝만 변형 — 미세 튜닝에 적합">Subtle</div>
+        <div class="chip active tt tt-below" data-intensity="1" data-tt="적당히 다른 느낌의 변주 — 기본 추천 강도">Normal</div>
+        <div class="chip tt tt-below" data-intensity="1.8" data-tt="완전히 다른 소리가 될 수도 있는 과감한 변형 — 새로운 아이디어 탐색용">Extreme</div>
       </div>
-      <div class="page-nav-btn" id="btnMutate" style="background:var(--amber);color:var(--bg-0);border-color:var(--amber);" title="현재 설정 기반 랜덤 변주 생성">🎲 Mutate</div>
+      <div class="page-nav-btn tt tt-below" id="btnMutate" style="background:var(--amber);color:var(--bg-0);border-color:var(--amber);" data-tt="현재 프리셋을 기반으로 Filter/Envelope/LFO/FX 값을 무작위로 살짝 바꿔 새로운 변주를 만듭니다. 마음에 안 들면 Undo로 취소하세요" title="현재 설정 기반 랜덤 변주 생성">🎲 Mutate</div>
       <span id="editStateLabel" style="font-family:var(--mono);font-size:10px;color:var(--text-lo);margin-left:auto;"></span>
     </div>
 
@@ -640,10 +641,10 @@
         <div class="panel-head"><div class="panel-title tt tt-below" data-tt="이펙트 센드 레벨 — Zone 컨트롤러의 FX Send와 별개로 톤 자체 FX 캐릭터 설정">FX SEND<span class="count">FX</span></div></div>
         <div class="panel-body">
           <div class="adsr-row">
-            <div class="adsr-unit tt tt-below" data-slider data-val="44" data-midi-cc="18" data-tt="FX1 이펙트로 보내는 신호의 양"><div class="fader-track"><div class="fader-fill"></div><div class="fader-cap"></div></div><span class="adsr-label">FX1 Send</span><span class="adsr-val"></span></div>
-            <div class="adsr-unit tt tt-below" data-slider data-val="67" data-midi-cc="19" data-tt="FX2 이펙트로 보내는 신호의 양"><div class="fader-track"><div class="fader-fill"></div><div class="fader-cap"></div></div><span class="adsr-label">FX2 Send</span><span class="adsr-val"></span></div>
-            <div class="adsr-unit tt tt-below" data-slider data-val="21" data-midi-cc="94" data-tt="딜레이 이펙트 — 소리를 일정 간격으로 반복 재생해 울림을 더함"><div class="fader-track"><div class="fader-fill"></div><div class="fader-cap"></div></div><span class="adsr-label">Delay</span><span class="adsr-val"></span></div>
-            <div class="adsr-unit tt tt-below" data-slider data-val="52" data-midi-cc="91" data-tt="리버브 이펙트 — 공간의 잔향감을 더해 소리를 풍부하게 만듦"><div class="fader-track"><div class="fader-fill"></div><div class="fader-cap"></div></div><span class="adsr-label">Reverb</span><span class="adsr-val"></span></div>
+            <div class="adsr-unit tt tt-below" data-slider data-val="44" data-midi-cc="18" data-tt="FX1(보통 Chorus/Distortion 계열) 센드량 — 음색에 두께감·움직임을 주고 싶을 때 올리세요. 예: 신스 리드를 좀 더 두껍게"><div class="fader-track"><div class="fader-fill"></div><div class="fader-cap"></div></div><span class="adsr-label">FX1 Send</span><span class="adsr-val"></span></div>
+            <div class="adsr-unit tt tt-below" data-slider data-val="67" data-midi-cc="19" data-tt="FX2(보조 이펙트) 센드량 — FX1과 함께 조합해 레이어드 사운드를 만들 때 활용하세요"><div class="fader-track"><div class="fader-fill"></div><div class="fader-cap"></div></div><span class="adsr-label">FX2 Send</span><span class="adsr-val"></span></div>
+            <div class="adsr-unit tt tt-below" data-slider data-val="21" data-midi-cc="94" data-tt="딜레이 — 소리를 반복 재생해 공간감·리듬감을 더함. 발라드 리드/어쿠스틱 기타처럼 여백 있는 파트에 살짝 올리면 좋고, 빠른 리듬 파트는 낮게 유지하세요"><div class="fader-track"><div class="fader-fill"></div><div class="fader-cap"></div></div><span class="adsr-label">Delay</span><span class="adsr-val"></span></div>
+            <div class="adsr-unit tt tt-below" data-slider data-val="52" data-midi-cc="91" data-tt="리버브 — 잔향으로 공간감을 더함. 스트링/패드/보컬류에 올리면 풍부해지고, 드럼/베이스처럼 타이트해야 하는 파트는 낮게 유지하는 게 좋습니다"><div class="fader-track"><div class="fader-fill"></div><div class="fader-cap"></div></div><span class="adsr-label">Reverb</span><span class="adsr-val"></span></div>
           </div>
         </div>
       </div>
@@ -669,11 +670,11 @@
         <div class="panel-head"><div class="panel-title tt tt-below" data-tt="SP8 SHIFT 3단(FX) 매핑 — Send/Delay/Reverb/Feedback">FX SEND<span class="count">FX</span></div></div>
         <div class="panel-body">
           <div class="adsr-row">
-            <div class="adsr-unit tt tt-below" data-slider data-val="46" data-midi-cc="18" data-tt="FX1 이펙트로 보내는 신호의 양"><div class="fader-track"><div class="fader-fill"></div><div class="fader-cap"></div></div><span class="adsr-label">FX1</span><span class="adsr-val"></span></div>
-            <div class="adsr-unit tt tt-below" data-slider data-val="81" data-midi-cc="19" data-tt="FX2 이펙트로 보내는 신호의 양"><div class="fader-track"><div class="fader-fill"></div><div class="fader-cap"></div></div><span class="adsr-label">FX2</span><span class="adsr-val"></span></div>
-            <div class="adsr-unit tt tt-below" data-slider data-val="33" data-midi-cc="94" data-tt="딜레이 이펙트 — 소리를 일정 간격으로 반복 재생해 울림을 더함"><div class="fader-track"><div class="fader-fill"></div><div class="fader-cap"></div></div><span class="adsr-label">Delay</span><span class="adsr-val"></span></div>
-            <div class="adsr-unit tt tt-below" data-slider data-val="60" data-midi-cc="91" data-tt="리버브 이펙트 — 공간의 잔향감을 더해 소리를 풍부하게 만듦"><div class="fader-track"><div class="fader-fill"></div><div class="fader-cap"></div></div><span class="adsr-label">Reverb</span><span class="adsr-val"></span></div>
-            <div class="adsr-unit tt tt-below" data-slider data-val="24" data-midi-cc="95" data-tt="딜레이 반복음이 다시 딜레이로 들어가는 비율(피드백). 높을수록 메아리가 오래 지속됨"><div class="fader-track"><div class="fader-fill"></div><div class="fader-cap"></div></div><span class="adsr-label">Delay FB</span><span class="adsr-val"></span></div>
+            <div class="adsr-unit tt tt-below" data-slider data-val="46" data-midi-cc="18" data-tt="FX1(보통 Chorus/Distortion 계열) 센드량 — 음색에 두께감·움직임을 주고 싶을 때 올리세요. 예: 신스 리드를 좀 더 두껍게"><div class="fader-track"><div class="fader-fill"></div><div class="fader-cap"></div></div><span class="adsr-label">FX1</span><span class="adsr-val"></span></div>
+            <div class="adsr-unit tt tt-below" data-slider data-val="81" data-midi-cc="19" data-tt="FX2(보조 이펙트) 센드량 — FX1과 함께 조합해 레이어드 사운드를 만들 때 활용하세요"><div class="fader-track"><div class="fader-fill"></div><div class="fader-cap"></div></div><span class="adsr-label">FX2</span><span class="adsr-val"></span></div>
+            <div class="adsr-unit tt tt-below" data-slider data-val="33" data-midi-cc="94" data-tt="딜레이 — 소리를 반복 재생해 공간감·리듬감을 더함. 발라드 리드/어쿠스틱 기타처럼 여백 있는 파트에 살짝 올리면 좋고, 빠른 리듬 파트는 낮게 유지하세요"><div class="fader-track"><div class="fader-fill"></div><div class="fader-cap"></div></div><span class="adsr-label">Delay</span><span class="adsr-val"></span></div>
+            <div class="adsr-unit tt tt-below" data-slider data-val="60" data-midi-cc="91" data-tt="리버브 — 잔향으로 공간감을 더함. 스트링/패드/보컬류에 올리면 풍부해지고, 드럼/베이스처럼 타이트해야 하는 파트는 낮게 유지하는 게 좋습니다"><div class="fader-track"><div class="fader-fill"></div><div class="fader-cap"></div></div><span class="adsr-label">Reverb</span><span class="adsr-val"></span></div>
+            <div class="adsr-unit tt tt-below" data-slider data-val="24" data-midi-cc="95" data-tt="딜레이 피드백 — 반복음이 다시 딜레이로 들어가는 비율. 높을수록 메아리가 오래 지속됨(앰비언트/신스 패드에 크게, 타이트한 사운드는 낮게)"><div class="fader-track"><div class="fader-fill"></div><div class="fader-cap"></div></div><span class="adsr-label">Delay FB</span><span class="adsr-val"></span></div>
           </div>
         </div>
       </div>
@@ -828,8 +829,8 @@
   </div>
 
   <div class="app-footer">
-    STUDIO TULZ is developed in-house by SOUNDGLÜCK. Unauthorized reproduction, redistribution, or use without permission is prohibited and may result in legal action under applicable copyright law.<br>
-    ⓒ SOUNDGLÜCK. All rights reserved. · STUDIO TULZ는 사운드글룩(SOUNDGLÜCK)이 자체 개발한 도구입니다. 무단 복제·재배포·상업적 무단 사용 시 저작권법에 따라 민형사상 법적 책임을 물을 수 있습니다.
+    <strong>STUDIO TULZ</strong> is developed in-house by <strong>SOUNDGLÜCK</strong>. Unauthorized reproduction, redistribution, or use without permission is prohibited and may result in legal action under applicable copyright law.<br>
+    ⓒ SOUNDGLÜCK. All rights reserved. · <strong>STUDIO TULZ</strong>는 <strong>사운드글룩(SOUNDGLÜCK)</strong>이 자체 개발한 도구입니다. 무단 복제·재배포·상업적 무단 사용 시 저작권법에 따라 민형사상 법적 책임을 물을 수 있습니다.
   </div>
 
 </div>
