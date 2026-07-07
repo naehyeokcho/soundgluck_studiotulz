@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SOUNDGLÜCK Studio Tulz — Wireframe v11.1</title>
+<title>SOUNDGLÜCK Studio Tulz — Wireframe v11.3</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -397,6 +397,40 @@
   .header-actions .hbtn{font-family:var(--mono);font-size:10.5px;padding:5px 9px;border-radius:6px;
     background:rgba(255,255,255,0.04);border:1px solid var(--border);color:var(--text-mid);cursor:pointer;white-space:nowrap;}
   .header-actions .hbtn:hover{background:rgba(255,255,255,0.08);color:var(--text-hi);}
+
+  /* ---- 사운드글룩 공식 채널 팝업 (v11.3) ---- */
+  .sglink-overlay{position:fixed;inset:0;z-index:9998;display:none;align-items:center;justify-content:center;
+    background:rgba(4,6,10,0.82);backdrop-filter:blur(4px);}
+  .sglink-overlay.show{display:flex;}
+  .sglink-card{width:380px;max-width:92vw;padding:34px 26px 26px;border-radius:20px;position:relative;
+    background:linear-gradient(180deg, rgba(15,22,26,0.97), rgba(8,10,14,0.98));
+    border:1px solid rgba(70,220,255,0.45);
+    box-shadow:0 0 0 1px rgba(70,220,255,0.15), 0 0 32px rgba(70,220,255,0.18), 0 20px 60px rgba(0,0,0,0.6);
+    text-align:center;}
+  .sglink-close{position:absolute;top:16px;right:18px;width:26px;height:26px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;color:var(--text-mid);cursor:pointer;font-size:15px;
+    border:1px solid var(--border);background:rgba(255,255,255,0.03);}
+  .sglink-close:hover{color:var(--text-hi);border-color:var(--border-hi);}
+  .sglink-logo{width:52px;height:52px;border-radius:50%;margin:0 auto 14px;display:flex;align-items:center;justify-content:center;
+    background:radial-gradient(circle at 35% 30%, rgba(70,220,255,0.35), rgba(70,220,255,0.06));
+    border:1px solid rgba(70,220,255,0.5);color:#5be6ff;font-size:20px;}
+  .sglink-title{font-family:var(--brand);font-weight:700;font-size:17px;letter-spacing:0.03em;color:var(--ivory);}
+  .sglink-sub{font-family:var(--mono);font-size:11px;color:var(--text-mid);margin-top:6px;margin-bottom:22px;}
+  .sglink-row{display:flex;align-items:center;gap:10px;padding:14px 16px;border-radius:12px;margin-bottom:10px;
+    background:rgba(255,255,255,0.03);border:1px solid var(--border);cursor:pointer;transition:all .15s;text-align:left;}
+  .sglink-row:hover{background:rgba(255,255,255,0.06);border-color:rgba(70,220,255,0.4);}
+  .sglink-row .sg-ico{width:20px;text-align:center;flex-shrink:0;}
+  .sglink-row .sg-label{flex:1;font-size:13.5px;font-weight:600;color:var(--text-hi);}
+  .sglink-row .sg-ext{color:var(--text-lo);font-size:13px;}
+  .sglink-kakao{margin-top:14px;padding:16px;border-radius:12px;text-align:center;
+    background:rgba(255,205,0,0.06);border:1px solid rgba(255,205,0,0.25);}
+  .sglink-kakao .kk-label{font-family:var(--mono);font-size:10px;letter-spacing:0.1em;color:#ffcd00;margin-bottom:6px;}
+  .sglink-kakao .kk-main{font-size:13.5px;font-weight:700;color:var(--ivory);margin-bottom:4px;}
+  .sglink-kakao .kk-sub{font-size:11px;color:var(--text-mid);}
+
+  /* ---- 하단 저작권 안내 (v11.3) ---- */
+  .app-footer{margin-top:36px;padding:18px 10px 6px;text-align:center;border-top:1px solid var(--border);
+    font-family:var(--mono);font-size:10.5px;line-height:1.7;color:var(--text-lo);}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
@@ -412,6 +446,35 @@
     <div class="login-hint">사운드글룩 정품 구매자 전용 도구입니다.<br>Chrome 또는 Edge 브라우저에 최적화되어 있습니다 (HTTPS 환경 권장).</div>
   </div>
 </div>
+
+<div class="sglink-overlay" id="sglinkOverlay">
+  <div class="sglink-card">
+    <div class="sglink-close" id="sglinkClose">✕</div>
+    <div class="sglink-logo">🔗</div>
+    <div class="sglink-title">SOUNDGLÜCK OFFICIAL</div>
+    <div class="sglink-sub">사운드글룩 공식 소통 채널 바로가기</div>
+
+    <a class="sglink-row" href="https://soundgluck.com/" target="_blank" rel="noopener">
+      <span class="sg-ico">🏬</span><span class="sg-label">공식 쇼핑몰</span><span class="sg-ext">↗</span>
+    </a>
+    <a class="sglink-row" href="https://smartstore.naver.com/soundgluck" target="_blank" rel="noopener">
+      <span class="sg-ico">🛍️</span><span class="sg-label">네이버 스마트 스토어</span><span class="sg-ext">↗</span>
+    </a>
+    <a class="sglink-row" href="https://www.instagram.com/soundgluck/" target="_blank" rel="noopener">
+      <span class="sg-ico">📷</span><span class="sg-label">공식 인스타그램</span><span class="sg-ext">↗</span>
+    </a>
+    <a class="sglink-row" href="https://x.com/SOUNDGLUCK" target="_blank" rel="noopener">
+      <span class="sg-ico">𝕏</span><span class="sg-label">공식 X (트위터)</span><span class="sg-ext">↗</span>
+    </a>
+
+    <div class="sglink-kakao">
+      <div class="kk-label">KAKAO CS CENTER</div>
+      <div class="kk-main">💬 카카오톡 채널 '사운드글룩' 검색</div>
+      <div class="kk-sub">문의 사항이나 기술 지원은 카카오 채널로 문의해 주세요.</div>
+    </div>
+  </div>
+</div>
+
 <div class="app">
 
   <div class="app-header">
@@ -427,6 +490,7 @@
       <div class="hbtn" id="btnMidiConnect" style="margin-left:8px;">MIDI 연결</div>
     </div>
     <div class="header-actions">
+      <div class="hbtn tt tt-below" id="btnSglink" data-tt="사운드글룩 공식 소통 채널 모아보기" style="border-color:rgba(70,220,255,0.4);color:#5be6ff;">🔗 사운드글룩</div>
       <div class="hbtn tt tt-below" id="btnExportSettings" data-tt="즐겨찾기·Zone 설정·편집 상태를 파일로 저장해 다른 기기에서 불러올 수 있습니다">⬇ 내보내기</div>
       <div class="hbtn tt tt-below" id="btnImportSettings" data-tt="내보내기로 저장한 설정 파일을 불러옵니다">⬆ 불러오기</div>
       <input type="file" id="importFileInput" accept="application/json" style="display:none;">
@@ -763,6 +827,10 @@
     </div>
   </div>
 
+  <div class="app-footer">
+    STUDIO TULZ is developed in-house by SOUNDGLÜCK. Unauthorized reproduction, redistribution, or use without permission is prohibited and may result in legal action under applicable copyright law.<br>
+    ⓒ SOUNDGLÜCK. All rights reserved. · STUDIO TULZ는 사운드글룩(SOUNDGLÜCK)이 자체 개발한 도구입니다. 무단 복제·재배포·상업적 무단 사용 시 저작권법에 따라 민형사상 법적 책임을 물을 수 있습니다.
+  </div>
 
 </div>
 
@@ -1598,37 +1666,45 @@ function resetEditorHistoryForCurrentModel(){
   updateEditHistoryButtons();
 }
 
+function flashEditorStatus(msg){
+  const el = document.getElementById('editStateLabel');
+  if(!el) return;
+  el.textContent = msg;
+  clearTimeout(el._resetTimer);
+  el._resetTimer = setTimeout(updateEditHistoryButtons, 1500);
+}
+
 function initHistoryAndMutate(){
   document.getElementById('btnEditUndo').addEventListener('click', ()=>{
-    if(editHistoryIdx <= 0){ flashStatus('더 되돌릴 이력이 없습니다'); return; }
+    if(editHistoryIdx <= 0){ flashEditorStatus('더 되돌릴 이력이 없습니다'); return; }
     editHistoryIdx -= 1;
     applyEditorSnapshot(editHistory[editHistoryIdx]);
     updateEditHistoryButtons();
-    flashStatus('Undo');
+    flashEditorStatus('Undo');
   });
   document.getElementById('btnEditRedo').addEventListener('click', ()=>{
-    if(editHistoryIdx >= editHistory.length-1){ flashStatus('다시 실행할 이력이 없습니다'); return; }
+    if(editHistoryIdx >= editHistory.length-1){ flashEditorStatus('다시 실행할 이력이 없습니다'); return; }
     editHistoryIdx += 1;
     applyEditorSnapshot(editHistory[editHistoryIdx]);
     updateEditHistoryButtons();
-    flashStatus('Redo');
+    flashEditorStatus('Redo');
   });
   document.getElementById('btnStoreA').addEventListener('click', ()=>{
     abSlots.A = currentEditorSnapshot();
     abShowing = 'A';
-    flashStatus('현재 상태를 A에 저장했습니다');
+    flashEditorStatus('현재 상태를 A에 저장했습니다');
   });
   document.getElementById('btnStoreB').addEventListener('click', ()=>{
     abSlots.B = currentEditorSnapshot();
     abShowing = 'B';
-    flashStatus('현재 상태를 B에 저장했습니다');
+    flashEditorStatus('현재 상태를 B에 저장했습니다');
   });
   document.getElementById('btnCompareAB').addEventListener('click', ()=>{
-    if(!abSlots.A || !abSlots.B){ flashStatus('먼저 Store A / Store B로 두 상태를 저장하세요'); return; }
+    if(!abSlots.A || !abSlots.B){ flashEditorStatus('먼저 Store A / Store B로 두 상태를 저장하세요'); return; }
     abShowing = abShowing === 'A' ? 'B' : 'A';
     applyEditorSnapshot(abSlots[abShowing]);
     commitEditorChange();
-    flashStatus(`${abShowing} 상태로 전환됨`);
+    flashEditorStatus(`${abShowing} 상태로 전환됨`);
   });
 
   let mutateIntensity = 1;
@@ -1658,7 +1734,7 @@ function initHistoryAndMutate(){
       if(c.midiCc !== null && c.midiCc !== undefined) sendMidiCC(0, c.midiCc, next);
     });
     commitEditorChange();
-    flashStatus(`Mutate 적용됨 (강도: ${mutateIntensity}x) — 마음에 안 들면 Undo`);
+    flashEditorStatus(`Mutate 적용됨 (강도: ${mutateIntensity}x) — 마음에 안 들면 Undo`);
   });
 
   resetEditorHistoryForCurrentModel();
@@ -2824,6 +2900,17 @@ document.getElementById('loginBtn').addEventListener('click', attemptLogin);
 document.getElementById('loginPw').addEventListener('keydown', (e)=>{ if(e.key === 'Enter') attemptLogin(); });
 document.getElementById('loginId').addEventListener('keydown', (e)=>{ if(e.key === 'Enter') document.getElementById('loginPw').focus(); });
 document.getElementById('btnLogout').addEventListener('click', logoutApp);
+
+/* ---- 사운드글룩 공식 채널 팝업 (v11.3) ---- */
+document.getElementById('btnSglink').addEventListener('click', ()=>{
+  document.getElementById('sglinkOverlay').classList.add('show');
+});
+document.getElementById('sglinkClose').addEventListener('click', ()=>{
+  document.getElementById('sglinkOverlay').classList.remove('show');
+});
+document.getElementById('sglinkOverlay').addEventListener('click', (e)=>{
+  if(e.target.id === 'sglinkOverlay') e.target.classList.remove('show');
+});
 
 /* ---- 저장/불러오기 버튼 ---- */
 document.getElementById('btnExportSettings').addEventListener('click', exportAppState);
