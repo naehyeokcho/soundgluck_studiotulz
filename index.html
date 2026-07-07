@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SOUNDGLÜCK Studio Tulz — Wireframe v10.2</title>
+<title>SOUNDGLÜCK Studio Tulz — Wireframe v11.0</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -509,6 +509,24 @@
       <span style="color:var(--text-lo);">· 변경사항은 실시간 MIDI CC 전송 (CC 번호는 추정치 — 악기 실기 확인 후 조정 필요)</span>
     </div>
 
+    <div class="preset-header" style="margin-bottom:14px;flex-wrap:wrap;gap:10px;">
+      <div class="page-nav-btn" id="btnEditUndo" data-tt="이전 상태로 되돌리기" title="Undo">↶ Undo</div>
+      <div class="page-nav-btn" id="btnEditRedo" data-tt="되돌리기 취소" title="Redo">↷ Redo</div>
+      <div style="width:1px;height:20px;background:var(--border-hi);"></div>
+      <div class="page-nav-btn" id="btnStoreA" title="현재 상태를 A에 저장">Store A</div>
+      <div class="page-nav-btn" id="btnStoreB" title="현재 상태를 B에 저장">Store B</div>
+      <div class="page-nav-btn" id="btnCompareAB" title="A/B 전환 비교">A/B 비교</div>
+      <div style="width:1px;height:20px;background:var(--border-hi);"></div>
+      <span style="font-family:var(--mono);font-size:10px;color:var(--text-lo);">MUTATE</span>
+      <div class="chip-row" id="mutateIntensity">
+        <div class="chip" data-intensity="0.3">Subtle</div>
+        <div class="chip active" data-intensity="1">Normal</div>
+        <div class="chip" data-intensity="1.8">Extreme</div>
+      </div>
+      <div class="page-nav-btn" id="btnMutate" style="background:var(--amber);color:var(--bg-0);border-color:var(--amber);" title="현재 설정 기반 랜덤 변주 생성">🎲 Mutate</div>
+      <span id="editStateLabel" style="font-family:var(--mono);font-size:10px;color:var(--text-lo);margin-left:auto;"></span>
+    </div>
+
     <div id="kEditor" class="editor-grid">
       <div class="panel">
         <div class="panel-head"><div class="panel-title tt tt-below" data-tt="필터 컷오프·레조넌스·키트랙, 필터 타입 선택">Filter<span class="count">FLT</span></div></div>
@@ -965,6 +983,27 @@ function sendMidiCC(channel, cc, value){
   midiOutput.send([status, cc & 0x7F, value & 0x7F]);
 }
 
+/* ---- Program/Multi 원격 로드 (v11.0) ----
+   주의: Bank(MSB/LSB)+Program Change 조합 공식은 매뉴얼의 "Program Change 0~2,097,151(=128^3)"
+   수치 범위에서 역산한 것으로, 커즈와일 공식 확답을 받은 값이 아닙니다(추정치, 실기 확인 필요).
+   id: PRESET_DATA의 Program/Multi ID (1부터 시작하는 번호를 0-based로 변환해서 계산) */
+function idToBankProgram(id){
+  const zeroBased = Math.max(0, id - 1);
+  const bankMSB = Math.floor(zeroBased / (128*128)) & 0x7F;
+  const bankLSB = Math.floor(zeroBased / 128) % 128;
+  const pc = zeroBased % 128;
+  return { bankMSB, bankLSB, pc };
+}
+
+function sendProgramChange(channel, id){
+  if(!midiOutput) return;
+  const { bankMSB, bankLSB, pc } = idToBankProgram(id);
+  const ch = Math.max(0, Math.min(15, channel));
+  sendMidiCC(ch, 0, bankMSB);
+  sendMidiCC(ch, 32, bankLSB);
+  midiOutput.send([0xC0 + ch, pc & 0x7F]);
+}
+
 document.getElementById('btnMidiConnect').addEventListener('click', initWebMidi);
 document.getElementById('midiOutSelect').addEventListener('change', (e)=>{
   const outputs = Array.from(midiAccess.outputs.values());
@@ -1285,19 +1324,30 @@ function renderAccordion(){
   });
   body.querySelectorAll('.preset-row').forEach(row=>{
     row.addEventListener('click', ()=>{
+      const presetId = parseInt(row.dataset.presetId, 10);
       if(currentPage === 'zone'){
         if(selectedZoneIdx === null){ flashStatus('먼저 Zone 카드를 클릭해서 선택하세요'); return; }
         const programs = ensureZonePrograms(MODELS[currentModel]);
-        programs[selectedZoneIdx] = { name: row.dataset.presetName };
+        if(libraryTab === 'programs'){
+          programs[selectedZoneIdx] = { name: row.dataset.presetName };
+          sendProgramChange(selectedZoneIdx, presetId);
+          flashStatus(`Z${String(selectedZoneIdx+1).padStart(2,'0')}에 "${row.dataset.presetName}" 레이어됨 (본체 전송)`);
+        } else {
+          // Multi 선택: 몇 개 Zone으로 구성됐는지 앱은 알 수 없음 -> 본체가 자체 구성으로 로드하도록 1회 전송,
+          // 화면에는 모든 Zone에 동일 라벨 표시(정확한 개별 Zone 구성은 본체에서 확인 필요)
+          for(let i=0;i<programs.length;i++) programs[i] = { name: `${row.dataset.presetName} (로드됨 — 본체 확인)` };
+          sendProgramChange(0, presetId);
+          flashStatus(`Multi "${row.dataset.presetName}" 전송됨 — 실제 Zone 구성은 본체에서 확인하세요`);
+        }
         document.getElementById('libraryOverlay').classList.remove('show');
         renderZones();
         updateSelectedZoneLabel();
-        flashStatus(`Z${String(selectedZoneIdx+1).padStart(2,'0')}에 "${row.dataset.presetName}" 레이어됨`);
         saveAppState();
       } else if(currentPage === 'editor'){
         applyPresetToEditor(row.dataset.presetId, row.dataset.presetName);
+        sendProgramChange(0, presetId);
         document.getElementById('libraryOverlay').classList.remove('show');
-        flashStatus(`"${row.dataset.presetName}" 편집중으로 로드됨`);
+        flashStatus(`"${row.dataset.presetName}" 편집중으로 로드됨 (본체 전송)`);
         saveAppState();
       } else {
         document.getElementById('libraryOverlay').classList.remove('show');
@@ -1324,6 +1374,7 @@ function updateEditorView(){
   const isSP8 = currentModel === 'SP8';
   document.getElementById('kEditor').style.display = isSP8 ? 'none' : 'grid';
   document.getElementById('sp8Editor').style.display = isSP8 ? 'grid' : 'none';
+  if(typeof resetEditorHistoryForCurrentModel === 'function' && EDITOR_CONTROLS.length) resetEditorHistoryForCurrentModel();
 }
 
 function bindKnobDrag(ring, opts){
@@ -1344,6 +1395,7 @@ function bindKnobDrag(ring, opts){
       ring.classList.remove('dragging');
       window.removeEventListener('pointermove', onMove);
       window.removeEventListener('pointerup', onUp);
+      if(opts.onCommit) opts.onCommit();
     }
     window.addEventListener('pointermove', onMove);
     window.addEventListener('pointerup', onUp, { once:true });
@@ -1353,12 +1405,20 @@ function bindKnobDrag(ring, opts){
     const v = Math.max(0, Math.min(127, opts.get() + (e.deltaY < 0 ? 1 : -1)));
     opts.set(v); opts.render(v);
     if(opts.midi) sendMidiCC(opts.midi.channel, opts.midi.cc, v);
+    if(opts.onCommit) opts.onCommit();
   }, { passive:false });
   ring.addEventListener('dblclick', (e)=>{
     e.stopPropagation();
     opts.set(opts.defaultVal); opts.render(opts.defaultVal);
     if(opts.midi) sendMidiCC(opts.midi.channel, opts.midi.cc, opts.defaultVal);
+    if(opts.onCommit) opts.onCommit();
   });
+}
+
+function editorControlCategory(unit){
+  const panel = unit.closest('.panel');
+  const title = panel ? panel.querySelector('.panel-title') : null;
+  return title ? title.childNodes[0].textContent.trim() : 'ETC';
 }
 
 const EDITOR_CONTROLS = []; // SOUND EDIT MODE의 모든 노브/슬라이더 컨트롤 참조 (프리셋 로드 시 값 갱신용)
@@ -1381,6 +1441,7 @@ function applyPresetToEditor(presetId, presetName){
   });
   const nameEl = document.querySelector('#pageEditor .preset-header .name');
   if(nameEl) nameEl.textContent = presetName;
+  if(typeof commitEditorChange === 'function') commitEditorChange();
 }
 
 function initEditorControls(){
@@ -1409,10 +1470,11 @@ function initEditorControls(){
       set: (v)=>{ unit.dataset.val = v; },
       render,
       defaultVal,
-      midi: midiCc !== null ? { channel: 0, cc: midiCc } : null
+      midi: midiCc !== null ? { channel: 0, cc: midiCc } : null,
+      onCommit: ()=> commitEditorChange()
     });
 
-    EDITOR_CONTROLS.push({ unit, apply: render });
+    EDITOR_CONTROLS.push({ unit, apply: render, midiCc, category: editorControlCategory(unit) });
   }
 
   function enhanceSlider(unit){
@@ -1444,7 +1506,7 @@ function initEditorControls(){
     setVal(parseInt(unit.dataset.val,10));
     const midiCc = unit.dataset.midiCc ? parseInt(unit.dataset.midiCc,10) : null;
 
-    EDITOR_CONTROLS.push({ unit, apply: setVal });
+    EDITOR_CONTROLS.push({ unit, apply: setVal, midiCc, category: editorControlCategory(unit) });
 
     track.addEventListener('pointerdown', (e)=>{
       e.preventDefault();
@@ -1458,6 +1520,7 @@ function initEditorControls(){
       function onUp(){
         window.removeEventListener('pointermove', onMove);
         window.removeEventListener('pointerup', onUp);
+        commitEditorChange();
       }
       window.addEventListener('pointermove', onMove);
       window.addEventListener('pointerup', onUp, { once:true });
@@ -1466,6 +1529,125 @@ function initEditorControls(){
 
   document.querySelectorAll('[data-knob]').forEach(enhanceKnob);
   document.querySelectorAll('[data-slider]').forEach(enhanceSlider);
+}
+
+/* ---- SOUND EDIT MODE: Undo/Redo + A/B 비교 + Mutate (v11.0) ---- */
+const EDIT_HISTORY_MAX = 50;
+let editHistory = [];
+let editHistoryIdx = -1;
+let abSlots = { A:null, B:null };
+let abShowing = null;
+
+function currentEditorSnapshot(){
+  const isSP8 = currentModel === 'SP8';
+  return EDITOR_CONTROLS
+    .filter(c => !!c.unit.closest('#sp8Editor') === isSP8)
+    .map(c => parseInt(c.unit.dataset.val, 10));
+}
+
+function applyEditorSnapshot(snap){
+  const isSP8 = currentModel === 'SP8';
+  const ctrls = EDITOR_CONTROLS.filter(c => !!c.unit.closest('#sp8Editor') === isSP8);
+  ctrls.forEach((c, i)=>{
+    if(snap[i] === undefined) return;
+    c.apply(snap[i]);
+    if(c.midiCc !== null && c.midiCc !== undefined) sendMidiCC(0, c.midiCc, snap[i]);
+  });
+}
+
+function updateEditHistoryButtons(){
+  const undoBtn = document.getElementById('btnEditUndo');
+  const redoBtn = document.getElementById('btnEditRedo');
+  if(undoBtn) undoBtn.style.opacity = editHistoryIdx > 0 ? '1' : '0.4';
+  if(redoBtn) redoBtn.style.opacity = editHistoryIdx < editHistory.length-1 ? '1' : '0.4';
+  const label = document.getElementById('editStateLabel');
+  if(label) label.textContent = `이력 ${editHistoryIdx+1}/${editHistory.length}`;
+}
+
+function commitEditorChange(){
+  const snap = currentEditorSnapshot();
+  // 직전 스냅샷과 동일하면 중복 push 방지
+  const last = editHistory[editHistoryIdx];
+  if(last && JSON.stringify(last) === JSON.stringify(snap)) return;
+  editHistory = editHistory.slice(0, editHistoryIdx+1);
+  editHistory.push(snap);
+  if(editHistory.length > EDIT_HISTORY_MAX) editHistory.shift();
+  editHistoryIdx = editHistory.length - 1;
+  updateEditHistoryButtons();
+}
+
+function resetEditorHistoryForCurrentModel(){
+  editHistory = [currentEditorSnapshot()];
+  editHistoryIdx = 0;
+  abSlots = { A:null, B:null };
+  abShowing = null;
+  updateEditHistoryButtons();
+}
+
+function initHistoryAndMutate(){
+  document.getElementById('btnEditUndo').addEventListener('click', ()=>{
+    if(editHistoryIdx <= 0){ flashStatus('더 되돌릴 이력이 없습니다'); return; }
+    editHistoryIdx -= 1;
+    applyEditorSnapshot(editHistory[editHistoryIdx]);
+    updateEditHistoryButtons();
+    flashStatus('Undo');
+  });
+  document.getElementById('btnEditRedo').addEventListener('click', ()=>{
+    if(editHistoryIdx >= editHistory.length-1){ flashStatus('다시 실행할 이력이 없습니다'); return; }
+    editHistoryIdx += 1;
+    applyEditorSnapshot(editHistory[editHistoryIdx]);
+    updateEditHistoryButtons();
+    flashStatus('Redo');
+  });
+  document.getElementById('btnStoreA').addEventListener('click', ()=>{
+    abSlots.A = currentEditorSnapshot();
+    abShowing = 'A';
+    flashStatus('현재 상태를 A에 저장했습니다');
+  });
+  document.getElementById('btnStoreB').addEventListener('click', ()=>{
+    abSlots.B = currentEditorSnapshot();
+    abShowing = 'B';
+    flashStatus('현재 상태를 B에 저장했습니다');
+  });
+  document.getElementById('btnCompareAB').addEventListener('click', ()=>{
+    if(!abSlots.A || !abSlots.B){ flashStatus('먼저 Store A / Store B로 두 상태를 저장하세요'); return; }
+    abShowing = abShowing === 'A' ? 'B' : 'A';
+    applyEditorSnapshot(abSlots[abShowing]);
+    commitEditorChange();
+    flashStatus(`${abShowing} 상태로 전환됨`);
+  });
+
+  let mutateIntensity = 1;
+  document.querySelectorAll('#mutateIntensity .chip').forEach(chip=>{
+    chip.addEventListener('click', ()=>{
+      document.querySelectorAll('#mutateIntensity .chip').forEach(c=>c.classList.remove('active'));
+      chip.classList.add('active');
+      mutateIntensity = parseFloat(chip.dataset.intensity);
+    });
+  });
+
+  const MUTATE_RANGE = {
+    'Filter': 0.28, 'TONE SHAPE': 0.28,
+    'Envelope': 0.15,
+    'LFO': 0.25,
+    'FX SEND': 0.10,
+  };
+  document.getElementById('btnMutate').addEventListener('click', ()=>{
+    const isSP8 = currentModel === 'SP8';
+    const ctrls = EDITOR_CONTROLS.filter(c => !!c.unit.closest('#sp8Editor') === isSP8);
+    ctrls.forEach(c=>{
+      const rangePct = MUTATE_RANGE[c.category] ?? 0.15;
+      const cur = parseInt(c.unit.dataset.val, 10);
+      const delta = (Math.random()*2 - 1) * 127 * rangePct * mutateIntensity;
+      const next = Math.max(0, Math.min(127, Math.round(cur + delta)));
+      c.apply(next);
+      if(c.midiCc !== null && c.midiCc !== undefined) sendMidiCC(0, c.midiCc, next);
+    });
+    commitEditorChange();
+    flashStatus(`Mutate 적용됨 (강도: ${mutateIntensity}x) — 마음에 안 들면 Undo`);
+  });
+
+  resetEditorHistoryForCurrentModel();
 }
 
 function switchPage(page){
@@ -2615,6 +2797,7 @@ loadAppState();
 renderAll();
 switchPage('zone');
 initEditorControls();
+initHistoryAndMutate();
 initLibraryToolbar();
 
 /* ---- 로그인 게이트 부트스트랩 ---- */
