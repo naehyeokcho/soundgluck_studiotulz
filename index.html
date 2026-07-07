@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SOUNDGLÜCK Studio Tulz — Wireframe v10.0</title>
+<title>SOUNDGLÜCK Studio Tulz — Wireframe v10.2</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -409,7 +409,7 @@
     <input type="password" id="loginPw" placeholder="비밀번호" autocomplete="off">
     <div class="login-error" id="loginError">아이디 또는 비밀번호가 올바르지 않습니다.</div>
     <button class="login-btn" id="loginBtn">로그인</button>
-    <div class="login-hint">사운드글룩 정품 구매자 전용 도구입니다.</div>
+    <div class="login-hint">사운드글룩 정품 구매자 전용 도구입니다.<br>Chrome 또는 Edge 브라우저에 최적화되어 있습니다 (HTTPS 환경 권장).</div>
   </div>
 </div>
 <div class="app">
@@ -420,7 +420,7 @@
       <div class="brand-divider"></div>
       <span class="brand-title">Studio Tulz</span>
     </div>
-    <div class="conn-status tt" id="connStatusBox" data-tt="Web MIDI로 실제 악기와 연결됩니다 (Chrome/Edge 권장, HTTPS 필요)">
+    <div class="conn-status tt tt-below" id="connStatusBox" data-tt="Web MIDI로 실제 악기와 연결됩니다 (Chrome/Edge 권장, HTTPS 필요)">
       <span class="dot" id="connDot"></span>
       <span id="connLabel">MIDI 미연결</span>
       <select id="midiOutSelect" style="display:none;background:var(--panel-2,#1a1a1a);color:var(--text-mid);border:1px solid var(--border,#333);border-radius:4px;font-family:var(--mono);font-size:11px;margin-left:6px;padding:2px 4px;"></select>
@@ -608,7 +608,13 @@
         <div class="score-toolbar-group">
           <span class="score-toolbar-label">박자표</span>
           <div class="chip-row" id="timeSigChips">
-            <div class="chip active">4/4</div><div class="chip">3/4</div><div class="chip">6/8</div>
+            <div class="chip">2/4</div><div class="chip active">4/4</div><div class="chip">3/4</div><div class="chip">6/8</div><div class="chip">5/4</div><div class="chip">9/8</div><div class="chip">12/8</div><div class="chip tt tt-below" id="customTsBtn" data-tt="분자/분모를 직접 입력해 원하는 박자표를 만듭니다">✎ 직접입력</div>
+          </div>
+          <div id="customTsForm" style="display:none;align-items:center;gap:6px;margin-top:6px;">
+            <input type="number" id="customTsTop" min="1" max="32" value="7" style="width:40px;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:4px;color:var(--text-hi);font-family:var(--mono);font-size:11px;padding:3px 4px;text-align:center;">
+            <span style="color:var(--text-mid);font-family:var(--mono);">/</span>
+            <input type="number" id="customTsBot" min="1" max="32" value="8" style="width:40px;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:4px;color:var(--text-hi);font-family:var(--mono);font-size:11px;padding:3px 4px;text-align:center;">
+            <div class="hbtn" id="customTsApply" style="cursor:pointer;">적용</div>
           </div>
         </div>
         <div class="score-toolbar-group">
@@ -1888,7 +1894,7 @@ document.getElementById('btnStop').addEventListener('click', ()=>{
   stopPlayback('정지됨');
 });
 
-/* ==================== LIVE STAFF 실시간 MIDI 채보 (v10.0) ==================== */
+/* ==================== LIVE STAFF 실시간 MIDI 채보 (v10.0, UI 버그수정 v10.1) ==================== */
 let isRecording = false;
 const activeNoteStarts = {}; // midiNumber -> startTime(ms)
 const recBoundInputs = new Set();
@@ -2193,6 +2199,7 @@ document.querySelectorAll('.page-nav-btn').forEach(btn=>{
 
 document.querySelectorAll('.chip-row').forEach(row=>{
   row.querySelectorAll('.chip').forEach(chip=>{
+    if(chip.id === 'customTsBtn') return;
     chip.addEventListener('click', ()=>{
       row.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
       chip.classList.add('active');
@@ -2201,6 +2208,33 @@ document.querySelectorAll('.chip-row').forEach(row=>{
       if(['pitchChips','durationChips','accidentalChips'].includes(row.id)) commitNoteEdit();
     });
   });
+});
+
+document.getElementById('customTsBtn').addEventListener('click', ()=>{
+  const form = document.getElementById('customTsForm');
+  form.style.display = (form.style.display === 'none') ? 'flex' : 'none';
+});
+document.getElementById('customTsApply').addEventListener('click', ()=>{
+  const top = Math.max(1, Math.min(32, parseInt(document.getElementById('customTsTop').value, 10) || 4));
+  const bot = Math.max(1, Math.min(32, parseInt(document.getElementById('customTsBot').value, 10) || 4));
+  const row = document.getElementById('timeSigChips');
+  row.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
+  let customChip = document.getElementById('customTsValueChip');
+  if(!customChip){
+    customChip = document.createElement('div');
+    customChip.className = 'chip';
+    customChip.id = 'customTsValueChip';
+    customChip.addEventListener('click', ()=>{
+      row.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
+      customChip.classList.add('active');
+      renderStaff();
+    });
+    row.insertBefore(customChip, document.getElementById('customTsBtn'));
+  }
+  customChip.textContent = `${top}/${bot}`;
+  customChip.classList.add('active');
+  document.getElementById('customTsForm').style.display = 'none';
+  renderStaff();
 });
 
 ['dottedToggle','tieToggle','lineBreakToggle'].forEach(id=>{
